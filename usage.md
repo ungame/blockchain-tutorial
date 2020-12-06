@@ -14,4 +14,10 @@
 
     # get balance
     go run main.go getbalance -address ADDRESS
+    
+    # create wallet
+    go run main.go createwallet
+    
+    # list addresses
+    go run main.go listaddresses
 ```

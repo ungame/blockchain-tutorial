@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"blockchain-tutorial/utils"
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
@@ -33,7 +34,7 @@ func (b *Block) Serialize() []byte {
 
 	err := encoder.Encode(b)
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	return buff.Bytes()
 }
@@ -45,7 +46,7 @@ func Deserialize(data []byte) *Block {
 
 	err := decoder.Decode(&block)
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	return &block
 }
@@ -54,7 +55,7 @@ func (b *Block) Info(pow string) {
 	fmt.Println("==============================================================================")
 	fmt.Printf("Hash:     %x\n", string(b.Hash))
 	fmt.Println("Transactions:")
-	Console(b.Transactions)
+	utils.Console(b.Transactions)
 	fmt.Printf("PrevHash: %x\n", string(b.PrevHash))
 	fmt.Printf("Nonce:    %v\n", b.Nonce)
 	fmt.Printf("PoW:      %v\n", pow)

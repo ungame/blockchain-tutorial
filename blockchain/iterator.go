@@ -1,6 +1,10 @@
 package blockchain
 
-import badger "github.com/dgraph-io/badger/v2"
+import (
+	"blockchain-tutorial/utils"
+
+	badger "github.com/dgraph-io/badger/v2"
+)
 
 type BlockChainIterator struct {
 	CurrentHash []byte
@@ -19,7 +23,7 @@ func (bci *BlockChainIterator) Next() *Block {
 	err := bci.db.View(func(txn *badger.Txn) error {
 
 		item, err := txn.Get(bci.CurrentHash)
-		HandleError(err)
+		utils.HandleError(err)
 
 		err = item.Value(func(encodedBlock []byte) error {
 			block = Deserialize(encodedBlock)
@@ -30,7 +34,7 @@ func (bci *BlockChainIterator) Next() *Block {
 		return err
 	})
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	bci.CurrentHash = block.PrevHash
 

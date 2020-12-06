@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"blockchain-tutorial/utils"
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -35,7 +36,7 @@ func InitBlockChain(address string) *BlockChain {
 	options := badger.DefaultOptions(dbPath)
 
 	db, err := badger.Open(options)
-	HandleError(err)
+	utils.HandleError(err)
 
 	err = db.Update(func(txn *badger.Txn) error {
 
@@ -45,7 +46,7 @@ func InitBlockChain(address string) *BlockChain {
 		coinbaseTx := CoinbaseTx(address, genesisData)
 		genesis := Genesis(coinbaseTx)
 		err := txn.Set(genesis.Hash, genesis.Serialize())
-		HandleError(err)
+		utils.HandleError(err)
 
 		fmt.Println("Genesis created")
 
@@ -56,7 +57,7 @@ func InitBlockChain(address string) *BlockChain {
 		return err
 	})
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	return &BlockChain{lastHash, db}
 }
@@ -73,12 +74,12 @@ func ContinueBlockChain(address string) *BlockChain {
 	options := badger.DefaultOptions(dbPath)
 
 	db, err := badger.Open(options)
-	HandleError(err)
+	utils.HandleError(err)
 
 	err = db.Update(func(txn *badger.Txn) error {
 
 		item, err := txn.Get(lastHashKey)
-		HandleError(err)
+		utils.HandleError(err)
 
 		err = item.Value(func(lh []byte) error {
 			lastHash = lh
@@ -88,7 +89,7 @@ func ContinueBlockChain(address string) *BlockChain {
 		return err
 	})
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	return &BlockChain{lastHash, db}
 }
@@ -115,7 +116,7 @@ func (bc *BlockChain) FindUnspentTransactions(address string) []Transaction {
 				// verifica se há indexes de Outpus no MAP
 				// com ID desta transação
 				if spentTXOs[txID] != nil {
-	
+
 					// percorre todos os Indexes de Outputs no MAP
 					// com o ID desta transação
 					for _, spentOut := range spentTXOs[txID] {
@@ -146,7 +147,7 @@ func (bc *BlockChain) FindUnspentTransactions(address string) []Transaction {
 					if in.CanUnlock(address) {
 						// o ID de um Input é Igual ao ID da Transação anterior
 						inTxID := hex.EncodeToString(in.ID)
-						
+
 						// adiciona o Index do Output na transação anterior
 						// ao MAP
 						spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Out)
@@ -210,7 +211,7 @@ func (bc *BlockChain) AddBlock(transactions []*Transaction) {
 	err := bc.db.View(func(txn *badger.Txn) error {
 
 		item, err := txn.Get(lastHashKey)
-		HandleError(err)
+		utils.HandleError(err)
 
 		err = item.Value(func(lh []byte) error {
 			lastHash = lh
@@ -218,19 +219,19 @@ func (bc *BlockChain) AddBlock(transactions []*Transaction) {
 		})
 		return err
 	})
-	HandleError(err)
+	utils.HandleError(err)
 
 	newBlock := CreateBlock(transactions, lastHash)
 
 	err = bc.db.Update(func(txn *badger.Txn) error {
 
 		err = txn.Set(newBlock.Hash, newBlock.Serialize())
-		HandleError(err)
+		utils.HandleError(err)
 
 		err = txn.Set(lastHashKey, newBlock.Hash)
 		return err
 	})
-	HandleError(err)
+	utils.HandleError(err)
 
 	bc.lasHash = newBlock.Hash
 }

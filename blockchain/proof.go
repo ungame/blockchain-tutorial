@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"blockchain-tutorial/utils"
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
@@ -74,7 +75,7 @@ func Int64ToHex(n int64) []byte {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, n)
 
-	HandleError(err)
+	utils.HandleError(err)
 
 	return buff.Bytes()
 }

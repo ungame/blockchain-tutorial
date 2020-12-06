@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"blockchain-tutorial/utils"
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
@@ -25,7 +26,7 @@ func (tx *Transaction) SetID() {
 
 	encoder := gob.NewEncoder(&encoded)
 	err := encoder.Encode(tx)
-	HandleError(err)
+	utils.HandleError(err)
 
 	hash = sha256.Sum256(encoded.Bytes())
 	tx.ID = hash[:]
@@ -33,25 +34,6 @@ func (tx *Transaction) SetID() {
 
 func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].ID) == 0 && tx.Inputs[0].Out == -1
-}
-
-type TxOutput struct {
-	Value     int
-	PublicKey string
-}
-
-func (out *TxOutput) CanBeUnlocked(address string) bool {
-	return out.PublicKey == address
-}
-
-type TxInput struct {
-	ID  []byte
-	Out int
-	Sig string
-}
-
-func (in *TxInput) CanUnlock(address string) bool {
-	return in.Sig == address
 }
 
 func CoinbaseTx(to, data string) *Transaction {
@@ -84,7 +66,7 @@ func NewTransaction(sender, receiver string, amount int, chain *BlockChain) *Tra
 
 	for txID, outs := range validOutputs {
 		txIDAsBytes, err := hex.DecodeString(txID)
-		HandleError(err)
+		utils.HandleError(err)
 
 		for _, out := range outs {
 			input := TxInput{txIDAsBytes, out, sender}
