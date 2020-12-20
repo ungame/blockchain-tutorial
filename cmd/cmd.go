@@ -38,6 +38,10 @@ func (c *commandLine) validate() {
 }
 
 func (c *commandLine) init(address string) {
+	if !wallet.ValidateAddress(address) {
+		utils.HandleError(wallet.ErrInvalidAddress)
+	}
+
 	chain := blockchain.InitBlockChain(address)
 	chain.Close()
 	fmt.Println("BlockChain initialized!")
@@ -64,11 +68,17 @@ func (c *commandLine) print() {
 }
 
 func (c *commandLine) getBalance(address string) {
+	if !wallet.ValidateAddress(address) {
+		utils.HandleError(wallet.ErrInvalidAddress)
+	}
+
 	chain := blockchain.ContinueBlockChain(address)
 	defer chain.Close()
 
 	balance := 0
-	UTXOs := chain.FindUTXO(address)
+	pubKeyHash := wallet.Base58Decode([]byte(address))
+	pubKeyHash = pubKeyHash[1: len(pubKeyHash) - 4]
+	UTXOs := chain.FindUTXO(pubKeyHash)
 
 	for _, out := range UTXOs {
 		balance += out.Value
@@ -78,6 +88,13 @@ func (c *commandLine) getBalance(address string) {
 }
 
 func (c *commandLine) send(sender, receiver string, amount int) {
+	if !wallet.ValidateAddress(sender) {
+		utils.HandleError(wallet.ErrInvalidAddress)
+	}
+	if !wallet.ValidateAddress(receiver) {
+		utils.HandleError(wallet.ErrInvalidAddress)
+	}
+
 	chain := blockchain.ContinueBlockChain(sender)
 	defer chain.Close()
 

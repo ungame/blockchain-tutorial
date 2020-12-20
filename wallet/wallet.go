@@ -2,16 +2,23 @@ package wallet
 
 import (
 	"blockchain-tutorial/utils"
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/ripemd160"
+	"log"
 )
 
 const (
 	checksumLength = 4
 	version        = byte(0x00)
+)
+
+var (
+	ErrInvalidAddress = errors.New("address is not valid")
 )
 
 type Wallet struct {
@@ -67,4 +74,18 @@ func Checksum(payload []byte) []byte {
 	firstHash := sha256.Sum256(payload)
 	secondHash := sha256.Sum256(firstHash[:])
 	return secondHash[:checksumLength]
+}
+
+
+func ValidateAddress(address string) bool {
+	pubKeyHash := Base58Decode([]byte(address))
+	actualChecksum := pubKeyHash[len(pubKeyHash)-checksumLength:]
+	version := pubKeyHash[0]
+	pubKeyHash = pubKeyHash[1:len(pubKeyHash)-checksumLength]
+	targetChecksum := Checksum(append([]byte{version}, pubKeyHash...))
+	isValid := bytes.Compare(actualChecksum, targetChecksum) == 0
+	if isValid {
+		log.Println("Address is Valid: ", address)
+	}
+	return isValid
 }

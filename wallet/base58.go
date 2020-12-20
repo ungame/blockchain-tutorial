@@ -8,7 +8,6 @@ import (
 
 func Base58Encode(input []byte) []byte {
 	encode := base58.Encode(input)
-
 	return []byte(encode)
 }
 

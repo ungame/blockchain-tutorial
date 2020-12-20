@@ -54,11 +54,15 @@ func Deserialize(data []byte) *Block {
 func (b *Block) Info(pow string) {
 	fmt.Println("==============================================================================")
 	fmt.Printf("Hash:     %x\n", string(b.Hash))
-	fmt.Println("Transactions:")
-	utils.Console(b.Transactions)
 	fmt.Printf("PrevHash: %x\n", string(b.PrevHash))
-	fmt.Printf("Nonce:    %v\n", b.Nonce)
 	fmt.Printf("PoW:      %v\n", pow)
+	fmt.Printf("Nonce:    %v\n", b.Nonce)
+	//fmt.Println("Transactions:")
+	//utils.Console(b.Transactions)
+	for _, tx := range b.Transactions {
+		fmt.Println(tx)
+	}
+	fmt.Println()
 }
 
 func CreateBlock(txs []*Transaction, prevHash []byte) *Block {
